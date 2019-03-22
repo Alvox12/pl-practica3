@@ -1,0 +1,57 @@
+options  {
+  STATIC=false;
+}  
+PARSER_BEGIN(AnalizadorSintactico)
+package asint;
+
+public class AnalizadorSintactico {}
+PARSER_END(AnalizadorSintactico)
+  TOKEN:{<#letra:["a"-"z","A"-"Z"]>}
+  TOKEN:{<#digito:["0"-"9"]>}
+  TOKEN:{<bbaja:"_">}
+  SKIP:{<["\t"," ","\r","\b","\n"]>}
+  TOKEN:{<num:"num">}
+  TOKEN:{<bool:"bool">}
+  TOKEN:{<verdadero:"true">}
+  TOKEN:{<falso:"false">}
+  TOKEN:{<or:"or">}
+  TOKEN:{<and:"and">}
+  TOKEN:{<not:"not">}
+  TOKEN:{<separador:"&&">}
+  TOKEN:{<exponencial:(["E","e"])(["+","-"])? <digito> (<digito>)*>}
+  TOKEN:{<identificador:<letra>(<letra>|<digito>|<bbaja>)*>}
+  TOKEN:{<numeroEntero: (["+","-"])? <digito> (<digito>)* (<exponencial>)?>}
+  TOKEN:{<numeroReal: (["+","-"])? <digito> (<digito>)* "." <digito> (<digito>)* (<exponencial>)?>}
+  
+  void Sp()   : {} {S() <EOF>}
+  void S()   : {} {LDs() <separador> LD2()}
+  void LDs()  : {} {D() RLDs()}
+  void RLDs() : {} {";" D() RLDs() | {} }
+  void D()    : {} {T() <identificador>}
+  void LD2()  : {} {D2() RLD2()}
+  void RLD2() : {} {";" D2() RLD2() | {} }
+  void D2()    : {} {<identificador> "=" E0()}
+  void E0()   : {} {E1() RE0()}
+  void RE0()  : {} {OP0() E1() RE0() | {} }
+  
+  void E1()   : {} {E2() RE1()}
+  void RE1()  : {} {<and> E2() RE1() |<or> E2()| {} }
+  
+  void E2()   : {} {E3() RE2()}
+  void RE2()  : {} {OP2() E3()|{} }
+  
+  void E3()   : {} {E4() RE3()}
+  void RE3()  : {} {OP3() E4() RE3() | {} }
+  
+  void E4()   : {} {"-" E4()|<not> E5()|E5()}
+  
+  void E5()   : {} {<numeroEntero> | <numeroReal> | <identificador> | <verdadero> | <falso> | "(" E0() ")"}
+  
+  void T()  : {} {<num> | <bool>}
+  void OP0()  : {} {"+" | "-"}
+  void OP2()  : {} {"<" | ">" | "<=" | ">=" | "==" | "!="}
+  void OP3()  : {} {"*" | "/"}
+  
+  
+  
+  
